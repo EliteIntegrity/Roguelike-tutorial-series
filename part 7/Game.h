@@ -1,0 +1,42 @@
+#pragma once
+#include <SDL3/SDL.h>
+#include <vector>
+#include <random>
+#include "Map.h"
+#include "GlyphCache.h"
+#include "Player.h"
+#include "Monster.h"
+#include "DijkstraMap.h"
+
+enum class GameState { Playing, Dead };
+
+class Game
+{
+public:
+    Game(SDL_Window* window, SDL_Renderer* sdl, GlyphCache& glyphs);
+    void run();
+
+private:
+    void      newGame();
+    void      playerAct(int dx, int dy);
+    void      monstersAct();
+    void      attack(Entity& attacker, Entity& defender);
+    Monster*  monsterAt(int x, int y);
+
+    void render();
+    void drawTile(int col, int row, const Tile& t);
+    void drawCentred(int row, const char* text, SDL_Color color);
+    void drawDeathScreen();
+    void updateTitle();
+
+    SDL_Window*   m_window;
+    SDL_Renderer* m_sdl;
+    GlyphCache&   m_glyphs;
+
+    Map                  m_map;
+    Player               m_player;
+    std::vector<Monster> m_monsters;
+    DijkstraMap          m_toPlayer;     // distance-to-player field, refreshed each turn
+    std::mt19937         m_rng{ std::random_device{}() };
+    GameState            m_state = GameState::Playing;
+};
